@@ -13,7 +13,7 @@ df.set_index('date', inplace=True)
 df = df[(df['value'] >= df['value'].quantile(0.025)) &
         (df['value'] <= df['value'].quantile(0.975))]
 
-print(df)
+# print(df)
 
 def draw_line_plot():
     # Draw line plot
@@ -22,7 +22,7 @@ def draw_line_plot():
     
     ax.set_xlabel('Date')
     ax.set_ylabel('Page Views')
-    ax.set_title('Page Views on freeCodeCamp.org Forum (2016-05-09 to 2019-12-03)')
+    ax.set_title('Daily freeCodeCamp Forum Page Views 5/2016-12/2019')
     plt.xticks(rotation=45, ha='right')    
     ax.xaxis.set_major_locator(MaxNLocator(5))
 
@@ -35,16 +35,32 @@ def draw_line_plot():
 
 def draw_bar_plot():
     # Copy and modify data for monthly bar plot
-    df_bar = None
+    df_bar = df.copy()  
+
+    df_bar.index = pd.to_datetime(df_bar.index)
+    df_bar['year'] = df_bar.index.year
+    df_bar['month'] = df_bar.index.month_name()
+
+    print(df_bar)
+    df_avg = df_bar.groupby(['year', 'month'])['value'].mean().unstack()
+    month_order = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    df_avg = df_avg.reindex(columns=month_order)
 
     # Draw bar plot
+    fig, ax = plt.subplots(figsize=(10, 7))
+    df_avg.plot(kind='bar', ax=ax)
+    ax.set_xlabel('Years')
+    ax.set_ylabel('Average Page Views')
+    ax.set_title('Average Daily Page Views by Month')
+    ax.legend(title='Months', labels=month_order, loc='upper left')
 
-
-
-
+    plt.xticks(rotation=45)
+    plt.tight_layout()
 
     # Save image and return fig (don't change this part)
     fig.savefig('bar_plot.png')
+    plt.show()
+
     return fig
 
 def draw_box_plot():
